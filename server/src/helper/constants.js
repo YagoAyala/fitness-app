@@ -2,8 +2,8 @@
 
 var CONST = {
   Filter: {
-    Property: "property",
-    Operator: "operator",
+    Property: "Property",
+    Operator: "Operator",
     Operators: {
       Equal: "=",
       LessThan: "<",
@@ -12,7 +12,7 @@ var CONST = {
       GreaterThanEqual: ">=",
       In: "IN",
     },
-    Value: "value"
+    Value: "Value"
   },
   ErrorSeverity: {
     LOW: "LOW",
