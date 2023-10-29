@@ -7,7 +7,17 @@ const datastore = new Datastore({
     credentials: datastoreCredential
 });
 
+const ensureKindTypeOf = (kind) => {
+    if(typeof kind !== "string" && typeof kind !== "undefined") {
+        throw new Error(`Kind typeof can not be ${typeof kind}`);
+    }
+}
+
 const ensureDataHasKeys = (data) => {
+    if(typeof data !== "object") {
+        throw new Error("Data typeof needs to be a object");
+    }
+
     if (!helper.checkIfObjectHasKeys(data)) {
         throw new Error("Data must have valid keys.");
     }
@@ -19,7 +29,9 @@ const ensureIdIsDefined = (id) => {
     }
 };
 
-const validateFunctionArguments = (type, data, id) => {
+const validateFunctionArguments = (type, kind, data, id) => {
+    ensureKindTypeOf(kind);
+
     if(type === "create" || type === "update") {
         ensureDataHasKeys(data);
     }
@@ -48,7 +60,7 @@ const create = async (user, kind, data) => {
     try {
         const namespace = user.Namespace;
 
-        validateFunctionArguments("create", data);
+        validateFunctionArguments("create", kind, data);
 
         const key = buildConfig(namespace, kind);
 
@@ -75,11 +87,11 @@ const create = async (user, kind, data) => {
 
 const getById = async (user, kind, id) => {
     try {
-        validateFunctionArguments("getById", {}, id);
+        validateFunctionArguments("getById", kind, {}, id);
 
         const namespace = user.Namespace;
 
-        const key = buildConfig(namespace, kind, id);
+        const key = buildConfig(namespace, kind, Number(id));
 
         const response = await datastore.get(key);
         return response;
@@ -92,7 +104,7 @@ const get = async (user, kind) => {
     try {
         const namespace = user.Namespace;
 
-        validateFunctionArguments("get");
+        validateFunctionArguments("get", kind);
 
         const query = datastore.createQuery(namespace, kind);
 
@@ -107,7 +119,7 @@ const update = async (user, kind, data) => {
     try {
         const namespace = user.Namespace;
 
-        validateFunctionArguments("update", data, data.Id);
+        validateFunctionArguments("update", kind, data, data.Id);
 
         const id = Number(data.Id);
 
@@ -131,11 +143,11 @@ const update = async (user, kind, data) => {
 
 const remove = async (user, kind, id) => {
     try {
-        validateFunctionArguments("remove", {}, id);
+        validateFunctionArguments("remove", kind, {}, id);
 
         const namespace = user.Namespace;
 
-        const key = buildConfig(namespace, kind, id);
+        const key = buildConfig(namespace, kind, Number(id));
 
         const response = await datastore.delete(key);
         return response;
