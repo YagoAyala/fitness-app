@@ -3,6 +3,7 @@ const AuthenticationService = require("../services/authentication.service")
 const signUpController = async (req, res) => {
     try {        
         const {User, Username, Email, Password} = req.body;
+        
         const result = await AuthenticationService.signUpService(User, Username, Email, Password);
         res.status(200).send(result);
     } catch (error) {
