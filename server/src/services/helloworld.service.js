@@ -1,11 +1,11 @@
-const { database } = require("../../firebase");
+// const { database } = require("../../database");
 
-const collection = database.collection("hello_world").doc("hello");
+// const collection = database.collection("hello_world").doc("hello");
 
 const helloWorldService = () => {
-    collection.update({
-        hello: "hello_world"
-    })
+    // collection.update({
+    //     hello: "hello_world"
+    // })
 }
 
 module.exports = {
