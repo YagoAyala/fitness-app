@@ -7,12 +7,6 @@ const datastore = new Datastore({
     credentials: datastoreCredential
 });
 
-const ensureKindIsDefined = (kind) => {
-    if (!kind) {
-        throw new Error("Kind must be defined.");
-    }
-};
-
 const ensureDataHasKeys = (data) => {
     if (!helper.checkIfObjectHasKeys(data)) {
         throw new Error("Data must have valid keys.");
@@ -25,9 +19,7 @@ const ensureIdIsDefined = (id) => {
     }
 };
 
-const validateFunctionArguments = ({ type, kind, data, id }) => {
-    ensureKindIsDefined(kind);
-
+const validateFunctionArguments = (type, data, id) => {
     if(type === "create" || type === "update") {
         ensureDataHasKeys(data);
     }
@@ -56,7 +48,7 @@ const create = async (user, kind, data) => {
     try {
         const namespace = user.Namespace;
 
-        validateFunctionArguments("create", kind, data);
+        validateFunctionArguments("create", data);
 
         const key = buildConfig(namespace, kind);
 
@@ -83,7 +75,7 @@ const create = async (user, kind, data) => {
 
 const getById = async (user, kind, id) => {
     try {
-        validateFunctionArguments("getById", kind, {}, id);
+        validateFunctionArguments("getById", {}, id);
 
         const namespace = user.Namespace;
 
@@ -100,7 +92,7 @@ const get = async (user, kind) => {
     try {
         const namespace = user.Namespace;
 
-        validateFunctionArguments("get", kind);
+        validateFunctionArguments("get");
 
         const query = datastore.createQuery(namespace, kind);
 
@@ -115,7 +107,7 @@ const update = async (user, kind, data) => {
     try {
         const namespace = user.Namespace;
 
-        validateFunctionArguments("update", kind, data, data.Id);
+        validateFunctionArguments("update", data, data.Id);
 
         const id = Number(data.Id);
 
@@ -129,8 +121,9 @@ const update = async (user, kind, data) => {
         data.z_LastChange_Date = new Date();
         data.z_LastChange_UserId = user.Id;
 
-        const response = await datastore.update(entity);
-        return response;
+        await datastore.update(entity);
+        
+        return data;
     } catch (error) {
         return helper.buildErrorReturn(error);
     }
@@ -138,7 +131,7 @@ const update = async (user, kind, data) => {
 
 const remove = async (user, kind, id) => {
     try {
-        validateFunctionArguments("remove", kind, {}, id);
+        validateFunctionArguments("remove", {}, id);
 
         const namespace = user.Namespace;
 
