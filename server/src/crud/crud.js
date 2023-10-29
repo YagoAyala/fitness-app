@@ -156,25 +156,29 @@ const remove = async (user, kind, id) => {
     }
 };
 
-// TODO: Yago improve this filter
-// const getByFilter = async (user, kind, filterProperty, filterValue) => {
-//     try {
-//         const namespace = user.Namespace;
+const getByFilter = async (user, kind, filters = []) => {
+    try {
+        const namespace = user.Namespace;
 
-//         const query = datastore.createQuery(namespace, kind).filter(filterProperty, "=", filterValue);
+        let query = datastore.createQuery(namespace, kind);
 
-//         const [entities] = await datastore.runQuery(query);
+        for (const filter of filters) {
+            const { Property, Operator, Value } = filter;
+            query = query.filter(Property, Operator, Value);
+        }
 
-//         const entitiesWithId = entities.map(entity => {
-//             entity.id = parseInt(entity[datastore.KEY].id);
-//             return entity;
-//         });
+        const [entities] = await datastore.runQuery(query);
 
-//         return entitiesWithId;
-//     } catch (error) {
-//         return helper.buildErrorReturn(error);
-//     }
-// };
+        const entitiesWithId = entities.map(entity => {
+            entity.id = parseInt(entity[datastore.KEY].id);
+            return entity;
+        });
+
+        return entitiesWithId;
+    } catch (error) {
+        return helper.buildErrorReturn(error);
+    }
+};
 
 module.exports = {
     create,
@@ -182,5 +186,5 @@ module.exports = {
     get,
     update,
     remove,
-    // getByFilter
+    getByFilter
 }
