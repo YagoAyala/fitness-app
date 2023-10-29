@@ -7,6 +7,36 @@ const datastore = new Datastore({
     credentials: datastoreCredential
 });
 
+const ensureKindIsDefined = (kind) => {
+    if (!kind) {
+        throw new Error("Kind must be defined.");
+    }
+};
+
+const ensureDataHasKeys = (data) => {
+    if (!helper.checkIfObjectHasKeys(data)) {
+        throw new Error("Data must have valid keys.");
+    }
+};
+
+const ensureIdIsDefined = (id) => {
+    if (!id) {
+        throw new Error("Entity requires a valid ID.");
+    }
+};
+
+const validateFunctionArguments = ({ type, kind, data, id }) => {
+    ensureKindIsDefined(kind);
+
+    if(type === "create" || type === "update") {
+        ensureDataHasKeys(data);
+    }
+
+    if(type === "update" || type === "getById" || type === "remove") {
+        ensureIdIsDefined(id);
+    }
+}
+
 const buildConfig = (namespace, kind, id) => {
     const path = [kind];
 
@@ -26,6 +56,8 @@ const create = async (user, kind, data) => {
     try {
         const namespace = user.Namespace;
 
+        validateFunctionArguments("create", kind, data);
+
         const key = buildConfig(namespace, kind);
 
         data.z_Inserted_Date = new Date();
@@ -37,8 +69,6 @@ const create = async (user, kind, data) => {
         };
 
         const [response] = await datastore.save(entity);
-
-        console.log(response.mutationResults[0].key.path[0].id, "response.mutationResults[0].key.path.id")
 
         const returnData = {
             ...data,
@@ -53,6 +83,8 @@ const create = async (user, kind, data) => {
 
 const getById = async (user, kind, id) => {
     try {
+        validateFunctionArguments("getById", kind, {}, id);
+
         const namespace = user.Namespace;
 
         const key = buildConfig(namespace, kind, id);
@@ -68,6 +100,8 @@ const get = async (user, kind) => {
     try {
         const namespace = user.Namespace;
 
+        validateFunctionArguments("get", kind);
+
         const query = datastore.createQuery(namespace, kind);
 
         const [entities] = await datastore.runQuery(query);
@@ -81,11 +115,9 @@ const update = async (user, kind, data) => {
     try {
         const namespace = user.Namespace;
 
-        if(!data.Id) {
-            throw new Error("Can not update Entity, without Id!");
-        }
+        validateFunctionArguments("update", kind, data, data.Id);
 
-        const id = data.Id;
+        const id = Number(data.Id);
 
         const key = buildConfig(namespace, kind, id);
 
@@ -106,6 +138,8 @@ const update = async (user, kind, data) => {
 
 const remove = async (user, kind, id) => {
     try {
+        validateFunctionArguments("remove", kind, {}, id);
+
         const namespace = user.Namespace;
 
         const key = buildConfig(namespace, kind, id);
@@ -117,24 +151,25 @@ const remove = async (user, kind, id) => {
     }
 };
 
-const getByFilter = async (user, kind, filterProperty, filterValue) => {
-    try {
-        const namespace = user.Namespace;
+// TODO: Yago improve this filter
+// const getByFilter = async (user, kind, filterProperty, filterValue) => {
+//     try {
+//         const namespace = user.Namespace;
 
-        const query = datastore.createQuery(namespace, kind).filter(filterProperty, "=", filterValue);
+//         const query = datastore.createQuery(namespace, kind).filter(filterProperty, "=", filterValue);
 
-        const [entities] = await datastore.runQuery(query);
+//         const [entities] = await datastore.runQuery(query);
 
-        const entitiesWithId = entities.map(entity => {
-            entity.id = parseInt(entity[datastore.KEY].id);
-            return entity;
-        });
+//         const entitiesWithId = entities.map(entity => {
+//             entity.id = parseInt(entity[datastore.KEY].id);
+//             return entity;
+//         });
 
-        return entitiesWithId;
-    } catch (error) {
-        return helper.buildErrorReturn(error);
-    }
-};
+//         return entitiesWithId;
+//     } catch (error) {
+//         return helper.buildErrorReturn(error);
+//     }
+// };
 
 module.exports = {
     create,
@@ -142,5 +177,5 @@ module.exports = {
     get,
     update,
     remove,
-    getByFilter
+    // getByFilter
 }
