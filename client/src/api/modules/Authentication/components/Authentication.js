@@ -48,6 +48,8 @@ const FormInput = ({ type, id, name, value, placeholder, onChange }) => (
       required
     />
   </div>
+
+  //TODO: remove this required;
 );
 
 const Register = ({ onSwitch }) => {
@@ -137,3 +139,8 @@ const Authentication = () => {
 };
 
 export default Authentication;
+
+//TODO: add response to the client, add toastify;
+//TODO: separated this big component into smalls one;
+//TODO: created my owns inputs components;
+//TODO: add login by google logic;

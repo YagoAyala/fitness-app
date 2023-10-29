@@ -2,6 +2,8 @@ const crud = require("../crud/crud");
 const CONST = require("../helper/constants");
 const bcrypt = require('bcryptjs');
 
+//TODO: add this functions validation into the helper.
+
 const isPasswordSafe = (password) => {
     const MIN_LENGTH = 8;
 
