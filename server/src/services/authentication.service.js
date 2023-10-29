@@ -24,7 +24,6 @@ const isPasswordSafe = (password) => {
     if (!/[!@#$%^&*]/.test(password)) {
         throw new Error("Password must have a special character");
     }
-    
 };
 
 const validateUsername = (username) => {
@@ -47,7 +46,7 @@ const ensureSignUpArguments = (username, email, password) => {
     isPasswordSafe(password);
 };
 
-const checkUserExistence = async (user, property, value) => {
+const getUserFromDatabase = async (user, property, value) => {
     const filter = [{
         [CONST.Filter.Property]: property,
         [CONST.Filter.Operator]: CONST.Filter.Operators.Equal,
@@ -56,10 +55,16 @@ const checkUserExistence = async (user, property, value) => {
 
     const users = await crud.getByFilter(user, "User", filter);
 
+    return users;
+};
+
+const checkUserExistence = async (user, property, value) => {
+    const users = await getUserFromDatabase (user, property, value);
+
     if (users.length) {
         throw new Error(`${property} already taken.`);
     }
-};
+}
 
 const signUpService = async (user, username, email, password) => {
     ensureSignUpArguments(username, email, password);
@@ -79,10 +84,22 @@ const signUpService = async (user, username, email, password) => {
     return await crud.create(user, "User", newUserEntity);
 };
 
-const signInService = async (email, password) => {
-    const userRecord = await adminAuth.signInWithEmailAndPassword(email, password);
-    console.log(userRecord, "userRecord")
-    return "X"
+const signInService = async (user, username, password) => {
+    // TODO: Improve to add login by email
+
+    const [userFromDatabase] = await getUserFromDatabase(user, "Username", username);
+
+    if (!userFromDatabase?.Username) {
+        throw new Error("User not found.");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, userFromDatabase.Password);
+
+    if (!isPasswordValid) {
+        throw new Error("Invalid password");
+    }
+
+    return {Ok: "ok", Message: "Successfully logged in"};
 }
 
 module.exports = {

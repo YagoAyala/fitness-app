@@ -13,8 +13,9 @@ const signUpController = async (req, res) => {
 
 const signInController = async (req, res) => {
     try {        
-        const {Email, Password} = req.body
-        const result = await AuthenticationService.signInService(Email, Password)
+        const {User, Username, Password} = req.body
+        
+        const result = await AuthenticationService.signInService(User, Username, Password)
         res.status(200).send(result)
     } catch (error) {
         res.status(500).send(error.message)
