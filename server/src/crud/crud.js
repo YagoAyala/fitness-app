@@ -169,12 +169,7 @@ const getByFilter = async (user, kind, filters = []) => {
 
         const [entities] = await datastore.runQuery(query);
 
-        const entitiesWithId = entities.map(entity => {
-            entity.id = parseInt(entity[datastore.KEY].id);
-            return entity;
-        });
-
-        return entitiesWithId;
+        return entities;
     } catch (error) {
         return helper.buildErrorReturn(error);
     }
